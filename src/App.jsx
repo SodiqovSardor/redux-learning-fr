@@ -1,53 +1,53 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "./Features/GetProductsSlice";
 import { deleteProducts } from "./Features/DeleteProductSlice";
-import { useState } from "react";
 import { addProduct } from "./Features/AddProductSlice";
-import { editProducts } from "./Features/EditProductSlice";
+import { editProducts } from "./Features/EditProductSlice"; // Fixed import name
 
 const App = () => {
+  const dispatch = useDispatch(); // Moved to the top
+
   const {
     data: getData,
     loading: getLoading,
     error: getError,
   } = useSelector((state) => state.getproducts);
-  const {
-    data: deleteData,
-    loading: deleteLoading,
-    error: deleteError,
-  } = useSelector((state) => state.deleteproducts);
-  const {
-    data: addData,
-    loading: addLoading,
-    error: addError,
-  } = useSelector((state) => state.addproducts);
-  const {
-    data: editData,
-    loading: editLoading,
-    error: editError,
-  } = useSelector((state) => state.editproducts);
+  
+  const { loading: deleteLoading } = useSelector((state) => state.deleteproducts);
+  const { loading: addLoading } = useSelector((state) => state.addproducts);
+  const { loading: editLoading } = useSelector((state) => state.editproducts);
 
-  const [id , setId] = useState('1')
+  const [id, setId] = useState(""); // Track ID for editing
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
-
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    dispatch(addProduct({ title, price }));
-  };
-
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    dispatch(editProduct({ id, title }));
-  };
-
-  const dispatch = useDispatch();
+  const [isEditing, setIsEditing] = useState(false); // Track if we are adding or editing
 
   useEffect(() => {
     dispatch(getProducts());
   }, [dispatch]);
+
+  const handleAddSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addProduct({ title, price }));
+    setTitle("");
+    setPrice("");
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    dispatch(editProducts({ id, title })); // Fixed to editProducts
+    setIsEditing(false);
+    setId("");
+    setTitle("");
+  };
+
+  // Helper to populate form for editing
+  const handleStartEdit = (product) => {
+    setIsEditing(true);
+    setId(product.id);
+    setTitle(product.title);
+  };
 
   if (getLoading) {
     return <h1>Loading...</h1>;
@@ -55,12 +55,12 @@ const App = () => {
   if (getError) {
     return <h1>Some error happened...</h1>;
   }
-  console.log(getData);
+
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <div>
-        <h1> Add Products</h1>
-        <form onSubmit={handleAddSubmit}>
+        <h1>{isEditing ? `Edit Product (ID: ${id})` : "Add Products"}</h1>
+        <form onSubmit={isEditing ? handleEditSubmit : handleAddSubmit}>
           <div>
             <input
               type="text"
@@ -70,34 +70,55 @@ const App = () => {
               required
             />
           </div>
-          <div style={{ marginTop: "10px" }}>
-            <input
-              type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
-          </div>
+          {!isEditing && (
+            <div style={{ marginTop: "10px" }}>
+              <input
+                type="number"
+                placeholder="Price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </div>
+          )}
           <button type="submit" style={{ marginTop: "10px" }}>
-            Submit
+            {isEditing ? (editLoading ? "Updating..." : "Update") : (addLoading ? "Adding..." : "Submit")}
           </button>
+          {isEditing && (
+            <button 
+              type="button" 
+              onClick={() => { setIsEditing(false); setTitle(""); }} 
+              style={{ marginLeft: "10px", marginTop: "10px" }}
+            >
+              Cancel
+            </button>
+          )}
         </form>
       </div>
-      {getData &&
-        getData.map((product) => (
-          <div key={product.id}>
-            <h2>Title : {product.title}</h2>
-            <button
-              onClick={() => {
-                dispatch(deleteProducts(product.id));
-              }}
-            >
-              Delete
-            </button>
-            <button>Edit</button>
-          </div>
-        ))}
+
+      <hr style={{ margin: "20px 0" }} />
+
+      <div>
+        <h2>Product List</h2>
+        {getData &&
+          getData.map((product) => (
+            <div key={product.id} style={{ marginBottom: "10px" }}>
+              <span>{product.title}</span>
+              <button
+                onClick={() => dispatch(deleteProducts(product.id))}
+                style={{ marginLeft: "10px" }}
+              >
+                {deleteLoading ? "Deleting..." : "Delete"}
+              </button>
+              <button
+                onClick={() => handleStartEdit(product)}
+                style={{ marginLeft: "5px" }}
+              >
+                Edit
+              </button>
+            </div>
+          ))}
+      </div>
     </div>
   );
 };
