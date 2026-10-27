@@ -37,7 +37,7 @@ export const ProductsSlice = createSlice({
         (state.loading = false), (state.error = action.error.message);
       })
       .addCase(addProducts.pending, (state) => {
-        (state.loading = true), (state.data = []), (state.error = null);
+        (state.loading = true), (state.error = null);
       })
       .addCase(addProducts.fulfilled, (state, action) => {
         (state.loading = false),
@@ -54,9 +54,13 @@ export const ProductsSlice = createSlice({
       })
       .addCase(editProducts.fulfilled, (state, action) => {
         (state.loading = false), (state.error = null);
+        const index = state.data.findIndex((p) => p.id === action.payload);
+        if (index !== -1) {
+          state.data[index] = { ...state.data[index], ...action.payload };
+        }
       })
       .addCase(editProducts.rejected, (state, action) => {
-        (state.loading = false), (state.data = []), (state.error = null);
+        (state.loading = false), (state.error = action.error.message);
       });
   },
 });
