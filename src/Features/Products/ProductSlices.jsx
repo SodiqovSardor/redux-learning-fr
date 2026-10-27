@@ -1,17 +1,11 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { getProducts } from "./GetProductsSlice";
 import { deleteProducts } from "./DeleteProductSlice";
 import { addProducts } from "./AddProductSlice";
 import { editProducts } from "./EditProductSlice";
+import { createSlice } from "@reduxjs/toolkit";
 
-export const getProducts = createAsyncThunk("getProduct", async () => {
-  const request = await fetch("https://dummyjson.com/products");
-  const data = await request.json();
-  return data.products;
-});
-
-export const getProductsSlice = createSlice({
-  name: "getProductSlice",
+export const ProductsSlice = createSlice({
+  name: "ProductSlice",
   initialState: {
     data: [],
     loading: false,
@@ -67,4 +61,4 @@ export const getProductsSlice = createSlice({
   },
 });
 
-export default getProductsSlice.reducer;
+export default ProductsSlice.reducer;

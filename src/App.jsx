@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { getProducts } from "./Features/GetProductsSlice";
-import { deleteProducts } from "./Features/DeleteProductSlice";
+import { getProducts } from "./Features/Products/GetProductsSlice";
+import { deleteProducts } from "./Features/Products/DeleteProductSlice";
 import { useState } from "react";
-import { addProducts } from "./Features/AddProductSlice";
+import { addProducts } from "./Features/Products/AddProductSlice";
 
 const App = () => {
   const dispatch = useDispatch();
