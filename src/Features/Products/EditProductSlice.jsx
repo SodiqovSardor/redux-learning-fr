@@ -12,5 +12,5 @@ export const editProducts = createAsyncThunk(
     });
     const response = await request.json();
     return response;
-  }
+  },
 );
